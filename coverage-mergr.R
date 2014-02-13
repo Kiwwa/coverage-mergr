@@ -23,8 +23,8 @@ coverage_path <- "/Users/lukeshillabeer/Documents/analysis-of-primers/745-set/74
 coverage_name <- "*.coverage"
 
 # GC content not currently in use
-gc_content_path <- ""
-gc_content_name <- ""
+gc_content_path <- "/Users/lukeshillabeer/Code/primer-lint/primerlint/output"
+gc_content_name <- "output.txt"
 #-------------------------------------------------------------------------
 
 smart.merge <- function(x, y, key){
@@ -99,7 +99,7 @@ smart_merge$key <- paste(smart_merge$chr,smart_merge$block_end)
 smart_merge <- smart_merge[,c(5, 1, 2, 3, 4)]
 names(smart_merge)[5] <- "num_pairs_1"
 
-for (i in 2:10){
+for (i in 2:length(list_of_data)){
   tempdf <- data.frame(list_of_data[i])
   tempdf$key <- paste(tempdf$chr, tempdf$block_end)
   tempdf <- tempdf[,c("key","num_pairs")]
@@ -113,7 +113,7 @@ smart_merge <- smart.merge(smart_merge,base_df_merge,"key")
 
 
 # import the GC-content data
-gc_content_file <- list.files(full.names = T, path = "/Users/lukeshillabeer/Code/primer-lint/primerlint/output", pattern = 'output.txt')
+gc_content_file <- list.files(full.names = T, path = gc_content_path, pattern = gc_content_name)
 gc_content <- as.data.frame(lapply(gc_content_file, read.table, sep="\t"))
 names(gc_content)[1] <- "fwd_primer"
 names(gc_content)[2] <- "fwd_gc"
