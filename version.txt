@@ -1,0 +1,15 @@
+
+COVERAGE-MERGR version Log - 
+
+----------------------------------------------------------------------------
+Version 0.1.1
+----------------------------------------------------------------------------
+- Added capability to merge in GC content data as well.
+- Script organisation and readability vastly increased.
+
+----------------------------------------------------------------------------
+Version 0.1
+----------------------------------------------------------------------------
+- Initial commit/version.
+- Capable of merging multiple coverage files and primers used for regions 
+  correctly.

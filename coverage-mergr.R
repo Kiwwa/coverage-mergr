@@ -1,7 +1,10 @@
-# ----------------------- COVERAGE-MERGR -------------------------------
+#-------------------------------------------------------------------------
+#  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+# /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  
+# ----------------------- COVERAGE-MERGR ---------------------------------
 #
 # Author:  Luke Shillabeer
-# Version: 0.1
+# Version: 0.1.1
 # Date:    13/02/2014
 #
 # Created in order to merge the values in all coverage files together
@@ -10,6 +13,9 @@
 #
 # Thanks to Harriet Dashnow for her super.merge function.
 
+#-------------------------------------------------------------------------
+#  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+# /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
 #-------------------- SET IMPORT LOCATIONS -------------------------------
 
 ### block_locations requires a tab-seperated-values file with columns;
@@ -22,10 +28,17 @@ block_locations_name <- "block_primer.tsv"
 coverage_path <- "/Users/lukeshillabeer/Documents/analysis-of-primers/745-set/745-plex_Expt103_106/rover/coverage_files"
 coverage_name <- "*.coverage"
 
-# GC content not currently in use
-gc_content_path <- "/Users/lukeshillabeer/Code/primer-lint/primerlint/output"
-gc_content_name <- "output.txt"
+# Importing the GC-content data
+fwd_gc_content_path <- "/Users/lukeshillabeer/Code/primer-lint/primerlint/output"
+fwd_gc_content_name <- "fwd_primer_745.txt"
+
+rev_gc_content_path <- "/Users/lukeshillabeer/Code/primer-lint/primerlint/output"
+rev_gc_content_name <- "rev_primer_745.txt"
+
 #-------------------------------------------------------------------------
+#  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+# /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+#--------------------------- FUNCTIONS -----------------------------------
 
 smart.merge <- function(x, y, key){
   # x and y are data frames with at least one column in common and sharing one column of unique keys
@@ -80,6 +93,11 @@ mergebasewithcoverage <- function(base, coverage, coverage_name) {
   return(mbl)
 }
 
+#-------------------------------------------------------------------------
+#  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+# /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+#--------------------------- DATA SETUP ----------------------------------
+
 # create the base data-frame which has the primers and gene-names
 base_file = list.files(full.names = T, path = block_locations_path, pattern = block_locations_name)
 base_df = makedataframe(coverage_files = base_file)
@@ -113,21 +131,22 @@ smart_merge <- smart.merge(smart_merge,base_df_merge,"key")
 
 
 # import the GC-content data
-gc_content_file <- list.files(full.names = T, path = gc_content_path, pattern = gc_content_name)
-gc_content <- as.data.frame(lapply(gc_content_file, read.table, sep="\t"))
-names(gc_content)[1] <- "fwd_primer"
-names(gc_content)[2] <- "fwd_gc"
+fwd_gc_content_file <- list.files(full.names = T, path = fwd_gc_content_path, pattern = fwd_gc_content_name)
+fwd_gc_content <- as.data.frame(lapply(fwd_gc_content_file, read.table, sep="\t", header=T))
 
-# merge in the foward GC-content data
-smart_merge_new <- merge(x=smart_merge, y=gc_content, by="fwd_primer")
+rev_gc_content_file <- list.files(full.names = T, path = rev_gc_content_path, pattern = rev_gc_content_name)
+rev_gc_content <- as.data.frame(lapply(rev_gc_content_file, read.table, sep="\t", header=T))
 
-# renames for reverse GC-content then merge it into a new data-frame
-names(gc_content)[1] <- "rev_primer"
-names(gc_content)[2] <- "rev_gc"
-smart_merge_with_gc <- merge(x=smart_merge_new, y=gc_content, by="rev_primer")
+smart_merge <- merge(smart_merge, fwd_gc_content, "key")
+smart_merge <- merge(smart_merge, rev_gc_content, "key")
+
+#-------------------------------------------------------------------------
+#  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+# /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  /  / 
+#-------------------------- ANALYSIS PHASE -------------------------------
 
 # perform some cleanup of useless data-frames before starting analysis
-rm(base_df, base_df_merge, smart_merge_new, tempdf)
+rm(base_df, base_df_merge, tempdf, fwd_gc_content, rev_gc_content, list_of_data)
 
 # create a data-frame for fwd-gc, rev-gc and absolute count of reads
 unique_fwd_gc <- unique(x=smart_merge_with_gc$fwd_gc)
